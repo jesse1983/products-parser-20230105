@@ -3,6 +3,7 @@ import { ImportingModule } from './importing/importing.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProductModule } from './product/product.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { HealthyModule } from './healthy/healthy.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
     ImportingModule,
     ProductModule,
+    HealthyModule,
   ],
 })
 export class AppModule {}

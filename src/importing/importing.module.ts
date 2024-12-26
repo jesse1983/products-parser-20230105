@@ -6,11 +6,15 @@ import { ImportingRepository } from './importing.repository';
 import { ProductModule } from 'src/product/product.module';
 import { ImportingService } from './importing.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ImportingProcess, ImportingProcessSchema } from './schemas/importing-process.schema';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    MongooseModule.forFeature([{ name: Importing.name, schema: ImportingSchema }]),
+    MongooseModule.forFeature([
+      { name: Importing.name, schema: ImportingSchema },
+      { name: ImportingProcess.name, schema: ImportingProcessSchema },
+    ]),
     ProductModule,
   ],
   providers: [

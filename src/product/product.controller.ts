@@ -1,12 +1,7 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Res, HttpStatus, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './schemas/product.schema';
 import { ApiCreatedResponse, ApiQuery, ApiResponse } from '@nestjs/swagger';
-
-type SearchProducts = {
-  offset?: number;
-  limit?: number;
-}
 
 @Controller('products')
 export class ProductController {
@@ -21,8 +16,8 @@ export class ProductController {
   @Get()
   @ApiQuery({ name: 'offset', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  findAll(@Query() search: SearchProducts) {
-    return this.productService.findAll({ ...search });
+  findAll(@Query() { limit = 20, offset = 0 }) {
+    return this.productService.findAll({ limit, offset });
   }
 
   @Get(':id')
