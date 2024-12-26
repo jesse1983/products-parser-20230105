@@ -7,6 +7,7 @@ import { ProductModule } from 'src/product/product.module';
 import { ImportingService } from './importing.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ImportingProcess, ImportingProcessSchema } from './schemas/importing-process.schema';
+import { NotifyModule } from 'src/notify/notify.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ImportingProcess, ImportingProcessSchema } from './schemas/importing-pr
       { name: ImportingProcess.name, schema: ImportingProcessSchema },
     ]),
     ProductModule,
+    NotifyModule,
   ],
   providers: [
     ImportingRepository,

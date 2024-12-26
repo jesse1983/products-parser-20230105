@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ImportingProcess } from './schemas/importing-process.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { NotifyService } from 'src/notify/notify.service';
 
 @Injectable()
 export class ImportingService implements OnModuleInit {
@@ -11,6 +12,7 @@ export class ImportingService implements OnModuleInit {
 
   constructor(
     private readonly importingOpenFoodsFacts: ImportingOpenFoodsFacts,
+    private readonly notifyService: NotifyService,
     @InjectModel(ImportingProcess.name) private importingProcessModel: Model<ImportingProcess>
   ) {}
 
@@ -20,7 +22,7 @@ export class ImportingService implements OnModuleInit {
 
   @Cron(CronExpression.EVERY_12_HOURS)
   async importAll() {
-    this.logger.log('Starting ImportingService::importAll');
+    this.logger.log('Starting ImportingService::importAll');    
     const created = await this.importingProcessModel.create({ status: 'WIP' });
 
     try {
@@ -28,10 +30,12 @@ export class ImportingService implements OnModuleInit {
         this.importingOpenFoodsFacts.execute()
       ]);
       created.status = 'DONE';
+      this.notifyService.publish('Data imported successfully 💚');
     } catch(e) {
       created.errorMessage = e.message;
       created.status = 'FAILED';
-      this.logger.error(e);
+      this.logger.error(`Error to import data ${e.message}`);
+      this.notifyService.publish('Error to importing data ❌');
     } finally {
       created.endDate = new Date();
       await created.save();
