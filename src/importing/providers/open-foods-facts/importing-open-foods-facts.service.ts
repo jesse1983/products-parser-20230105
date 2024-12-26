@@ -8,6 +8,7 @@ import * as zlib from 'node:zlib';
 import { ImportingRepository } from 'src/importing/importing.repository';
 import { ProductService } from 'src/product/product.service';
 import mongoose from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 
 const LineByLineReader = require('line-by-line');
 
@@ -16,9 +17,10 @@ export class ImportingOpenFoodsFacts implements IImportingService {
 
     private readonly logger = new Logger(ImportingOpenFoodsFacts.name);
 
-    private readonly MAX_ROWS = 100;
+    private readonly DOWNLOAD_PATH = './downloads';
 
     constructor(
+        private readonly configService: ConfigService,
         private readonly importingRepository: ImportingRepository,
         private readonly productService: ProductService,
     ) {}
@@ -50,17 +52,16 @@ export class ImportingOpenFoodsFacts implements IImportingService {
     }
 
     private async getDataListFromSource(): Promise<string[]> {
-        const result = await fetch('https://challenges.coode.sh/food/data/json/index.txt');
+        const result = await fetch(this.configService.get<string>('OPEN_FOODS_FILES_URL'));
         const text = await result.text();
         return text.split('\n');
     }
 
     private async downloadZip(fileName: string): Promise<string> {
-        const url = `https://challenges.coode.sh/food/data/json/${fileName}`;
-        const downloadDir = path.resolve("./downloads");
+        const url = `${this.configService.get<string>('OPEN_FOODS_JSON_URL')}${fileName}`;
+        const downloadDir = path.resolve(this.DOWNLOAD_PATH);
         const destination = path.join(downloadDir, fileName);
     
-        // Criar diretório "downloads" se não existir
         if (!fs.existsSync(downloadDir)) {
             await mkdir(downloadDir, { recursive: true });
         }
@@ -101,13 +102,14 @@ export class ImportingOpenFoodsFacts implements IImportingService {
     private async getFirstLines(inputFile: string, outputFile: string): Promise<string> {
         return new Promise((resolve) => {
             const rl = new LineByLineReader(inputFile);
+            const maxRows = this.configService.get<number>('OPEN_FOODS_MAX_ROWS');
 
             const outputStream = fs.createWriteStream(outputFile);
     
             let lineCount = 0;
             rl.on('line', (line) => {
-                if (lineCount <= this.MAX_ROWS) {
-                    const comma = lineCount < this.MAX_ROWS && lineCount > 0  ? ',' : '';
+                if (lineCount <= maxRows) {
+                    const comma = lineCount < maxRows && lineCount > 0  ? ',' : '';
                     outputStream.write(line + comma + "\n");
                     lineCount += 1;
                 } else {
@@ -124,8 +126,8 @@ export class ImportingOpenFoodsFacts implements IImportingService {
 
     private async clearFiles(fileName: string) {
         const [startName] = fileName.split('.');
-        const files = fs.readdirSync('./downloads').filter(fn => fn.startsWith(startName));
-        for (const file of files) fs.unlinkSync('./downloads/' + file);
+        const files = fs.readdirSync(this.DOWNLOAD_PATH).filter(fn => fn.startsWith(startName));
+        for (const file of files) fs.unlinkSync(this.DOWNLOAD_PATH + '/' + file);
     }
 
     private async importData(importingRef: mongoose.Schema.Types.ObjectId, rows: unknown[], fileName: string) {

@@ -1,4 +1,21 @@
 services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    links:
+      - mongo
+    environment:
+      - MONGODB_URI=mongodb://root:12345678@mongo:27017
+      - OPEN_FOODS_FILES_URL=https://challenges.coode.sh/food/data/json/index.txt
+      - OPEN_FOODS_JSON_URL=https://challenges.coode.sh/food/data/json/
+      - OPEN_FOODS_MAX_ROWS=100
+      - NOTIFY_PUBLISH_URL=https://ntfy.sh/jesse1983
+    networks:
+      - mongo-compose-network
+    depends_on:
+      - mongo
+  
   mongo-express:
     image: mongo-express
     ports:

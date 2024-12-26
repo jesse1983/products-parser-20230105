@@ -1,8 +1,4 @@
-
-- Alert with errors
-- Readme
 - Tests
-- Docker
-- Config
+- Readme
 - Lint
 - ElasticSearch

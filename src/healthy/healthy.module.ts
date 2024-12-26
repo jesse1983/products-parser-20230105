@@ -3,9 +3,11 @@ import { HealthyController } from './healthy.controller';
 import { HealthyService } from './healthy.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ImportingProcess, ImportingProcessSchema } from 'src/importing/schemas/importing-process.schema';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   imports: [
+    DatabaseModule,
     MongooseModule.forFeature([
       { name: ImportingProcess.name, schema: ImportingProcessSchema },
     ]),

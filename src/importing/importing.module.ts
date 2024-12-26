@@ -8,10 +8,14 @@ import { ImportingService } from './importing.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ImportingProcess, ImportingProcessSchema } from './schemas/importing-process.schema';
 import { NotifyModule } from 'src/notify/notify.module';
+import { DatabaseModule } from 'src/database/database.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     ScheduleModule.forRoot(),
+    DatabaseModule,
     MongooseModule.forFeature([
       { name: Importing.name, schema: ImportingSchema },
       { name: ImportingProcess.name, schema: ImportingProcessSchema },
