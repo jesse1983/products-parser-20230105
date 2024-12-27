@@ -1,4 +1,3 @@
-
 export abstract class IImportingService {
-    async execute() {}
+  async execute() {}
 }

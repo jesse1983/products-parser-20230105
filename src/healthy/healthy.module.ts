@@ -1,9 +1,12 @@
-import { Module } from '@nestjs/common';
-import { HealthyController } from './healthy.controller';
-import { HealthyService } from './healthy.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ImportingProcess, ImportingProcessSchema } from 'src/importing/schemas/importing-process.schema';
-import { DatabaseModule } from 'src/database/database.module';
+import { Module } from "@nestjs/common";
+import { HealthyController } from "./healthy.controller";
+import { HealthyService } from "./healthy.service";
+import { MongooseModule } from "@nestjs/mongoose";
+import {
+  ImportingProcess,
+  ImportingProcessSchema,
+} from "../importing/schemas/importing-process.schema";
+import { DatabaseModule } from "../database/database.module";
 
 @Module({
   imports: [
@@ -13,6 +16,6 @@ import { DatabaseModule } from 'src/database/database.module';
     ]),
   ],
   controllers: [HealthyController],
-  providers: [HealthyService]
+  providers: [HealthyService],
 })
 export class HealthyModule {}

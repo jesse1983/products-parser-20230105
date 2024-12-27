@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ImportingOpenFoodsFacts } from './providers/open-foods-facts/importing-open-foods-facts.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { ImportingProcess } from './schemas/importing-process.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { NotifyService } from 'src/notify/notify.service';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { ImportingOpenFoodsFacts } from "./providers/open-foods-facts/importing-open-foods-facts.service";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { ImportingProcess } from "./schemas/importing-process.schema";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { NotifyService } from "../notify/notify.service";
 
 @Injectable()
 export class ImportingService implements OnModuleInit {
@@ -13,33 +13,32 @@ export class ImportingService implements OnModuleInit {
   constructor(
     private readonly importingOpenFoodsFacts: ImportingOpenFoodsFacts,
     private readonly notifyService: NotifyService,
-    @InjectModel(ImportingProcess.name) private importingProcessModel: Model<ImportingProcess>
+    @InjectModel(ImportingProcess.name)
+    private importingProcessModel: Model<ImportingProcess>,
   ) {}
 
   onModuleInit() {
-    this.importAll();
+    if (process.env.NODE_ENV !== "test") this.importAll();
   }
 
   @Cron(CronExpression.EVERY_12_HOURS)
   async importAll() {
-    this.logger.log('Starting ImportingService::importAll');    
-    const created = await this.importingProcessModel.create({ status: 'WIP' });
+    this.logger.log("Starting ImportingService::importAll");
+    const created = await this.importingProcessModel.create({ status: "WIP" });
 
     try {
-      await Promise.all([
-        this.importingOpenFoodsFacts.execute()
-      ]);
-      created.status = 'DONE';
-      this.notifyService.publish('Data imported successfully 💚');
-    } catch(e) {
+      await Promise.all([this.importingOpenFoodsFacts.execute()]);
+      created.status = "DONE";
+      this.notifyService.publish("Data imported successfully 💚");
+    } catch (e) {
       created.errorMessage = e.message;
-      created.status = 'FAILED';
+      created.status = "FAILED";
       this.logger.error(`Error to import data ${e.message}`);
-      this.notifyService.publish('Error to importing data ❌');
+      this.notifyService.publish("Error to importing data ❌");
     } finally {
       created.endDate = new Date();
       await created.save();
-      this.logger.log('End ImportingService::importAll');
+      this.logger.log("End ImportingService::importAll");
     }
   }
 }
